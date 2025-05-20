@@ -1,65 +1,64 @@
-"use client";
-import { useState } from "react";
-import axios from "axios";
+import Link from "next/link";
+import { ArrowRightIcon, CheckBadgeIcon, DocumentTextIcon, CheckCircleIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 
-type CopyrightResult = {
-  id: string;
-  title: string;
-  description: string;
-  file_hash: string;
-  signature: string;
-  file_path: string;
-  blockchain_tx_hash: string | null;
-  created_at: string;
-};
-
-export default function Home() {
-  const [result, setResult] = useState<CopyrightResult | null>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!file) return;
-
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-    formData.append("file", file);
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const res = await axios.post("http://localhost:8000/register", formData);
-      setResult(res.data); // FIX
-    } catch (err) {
-      console.error("Đăng ký thất bại:", err);
-      setError("Đăng ký thất bại");
-    } finally {
-      setLoading(false);
-    }
-  };
+export default function Dashboard() {
+  const cards = [
+    {
+      title: "Đăng ký bản quyền mới",
+      description: "Tạo mới bản quyền kỹ thuật số của bạn",
+      href: "/register",
+      icon: DocumentTextIcon,
+      color: "bg-blue-100 text-blue-700",
+    },
+    {
+      title: "Danh sách bản quyền",
+      description: "Xem các bản quyền",
+      href: "/explore",
+      icon: CheckBadgeIcon,
+      color: "bg-green-100 text-green-700",
+    },
+    {
+      title: "Tra cứu bản quyền",
+      description: "Tìm kiếm và kiểm tra trạng thái bản quyền",
+      href: "/search",
+      icon: CheckCircleIcon,
+      color: "bg-yellow-100 text-yellow-700",
+    },
+    {
+      title: "Admin - Duyệt bản quyền",
+      description: "Quản lý và duyệt các bản quyền chờ xét duyệt",
+      href: "/moderate",
+      icon: UserGroupIcon,
+      color: "bg-purple-100 text-purple-700",
+    },
+  ];
 
   return (
-    <main className="p-10 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Đăng ký bản quyền</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input name="title" placeholder="Tiêu đề" className="w-full border p-2" required />
-        <textarea name="description" placeholder="Mô tả" className="w-full border p-2" required />
-        <input name="file" type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} required />
-        <button type="submit" disabled={loading} className="bg-blue-500 text-white px-4 py-2 rounded">
-          {loading ? "Đang gửi..." : "Đăng ký"}
-        </button>
-        {error && <p className="text-red-500">{error}</p>}
-      </form>
+    <main className="min-h-screen bg-gray-50 flex flex-col items-center py-16 px-6">
+      <h1 className="text-4xl font-extrabold mb-12 text-gray-900 text-center max-w-3xl">
+        Hệ thống Quản lý Bản quyền Kỹ thuật số
+      </h1>
 
-      {result && (
-        <div className="mt-6 p-4 border rounded bg-gray-100">
-          <h2 className="font-bold">Thông tin bản quyền:</h2>
-          <pre className="text-sm whitespace-pre-wrap">{JSON.stringify(result, null, 2)}</pre>
-        </div>
-      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl w-full">
+        {cards.map(({ title, description, href, icon: Icon, color }) => (
+          <Link
+            key={title}
+            href={href}
+            className="group block rounded-xl p-6 bg-white shadow-md hover:shadow-xl transition-shadow duration-300"
+          >
+            <div className={`inline-flex p-3 rounded-lg ${color} mb-4`}>
+              <Icon className="h-8 w-8" />
+            </div>
+            <h2 className="text-lg font-semibold mb-2 group-hover:text-blue-600 transition-colors">
+              {title}
+            </h2>
+            <p className="text-gray-600 mb-4">{description}</p>
+            <span className="inline-flex items-center text-blue-600 group-hover:underline font-medium">
+              Xem thêm <ArrowRightIcon className="h-5 w-5 ml-1" />
+            </span>
+          </Link>
+        ))}
+      </div>
     </main>
   );
 }
