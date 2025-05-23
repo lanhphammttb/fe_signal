@@ -26,17 +26,25 @@ export default function Register() {
 
     const form = e.currentTarget;
     const formData = new FormData(form);
+    // Thường nếu input file có name="file" thì không cần append thêm,
+    // nhưng nếu bạn giữ riêng file state thì append vẫn ok
     formData.append("file", file);
 
     setLoading(true);
     setError(null);
 
     try {
-      const res = await axios.post(api.register, formData)
-      setResult(res.data); // FIX
-    } catch (err) {
+      const res = await axios.post(api.register, formData, {
+        withCredentials: true,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+      setResult(res.data); // cập nhật kết quả trả về từ API
+    } catch (err: any) {
       console.error("Đăng ký thất bại:", err);
-      setError("Đăng ký thất bại");
+      // backend FastAPI trả lỗi trong 'detail' chứ không phải 'message'
+      setError(err.response?.data?.detail || "Đăng ký thất bại");
     } finally {
       setLoading(false);
     }
@@ -46,10 +54,29 @@ export default function Register() {
     <main className="p-10 max-w-xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Đăng ký bản quyền</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input name="title" placeholder="Tiêu đề" className="w-full border p-2" required />
-        <textarea name="description" placeholder="Mô tả" className="w-full border p-2" required />
-        <input name="file" type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} required />
-        <button type="submit" disabled={loading} className="bg-blue-500 text-white px-4 py-2 rounded">
+        <input
+          name="title"
+          placeholder="Tiêu đề"
+          className="w-full border p-2"
+          required
+        />
+        <textarea
+          name="description"
+          placeholder="Mô tả"
+          className="w-full border p-2"
+          required
+        />
+        <input
+          name="file"
+          type="file"
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          required
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
           {loading ? "Đang gửi..." : "Đăng ký"}
         </button>
         {error && <p className="text-red-500">{error}</p>}
@@ -58,7 +85,9 @@ export default function Register() {
       {result && (
         <div className="mt-6 p-4 border rounded bg-gray-100">
           <h2 className="font-bold">Thông tin bản quyền:</h2>
-          <pre className="text-sm whitespace-pre-wrap">{JSON.stringify(result, null, 2)}</pre>
+          <pre className="text-sm whitespace-pre-wrap">
+            {JSON.stringify(result, null, 2)}
+          </pre>
         </div>
       )}
     </main>

@@ -1,38 +1,57 @@
+// app/page.tsx
 import Link from "next/link";
-import { ArrowRightIcon, CheckBadgeIcon, DocumentTextIcon, CheckCircleIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import {
+  ArrowRightIcon,
+  CheckBadgeIcon,
+  DocumentTextIcon,
+  CheckCircleIcon,
+  UserGroupIcon,
+} from "@heroicons/react/24/outline";
 
-export default function Dashboard() {
-  const cards = [
-    {
-      title: "Đăng ký bản quyền mới",
-      description: "Tạo mới bản quyền kỹ thuật số của bạn",
-      href: "/register",
-      icon: DocumentTextIcon,
-      color: "bg-blue-100 text-blue-700",
-    },
-    {
-      title: "Danh sách bản quyền",
-      description: "Xem các bản quyền",
-      href: "/explore",
-      icon: CheckBadgeIcon,
-      color: "bg-green-100 text-green-700",
-    },
-    {
-      title: "Tra cứu bản quyền",
-      description: "Tìm kiếm và kiểm tra trạng thái bản quyền",
-      href: "/search",
-      icon: CheckCircleIcon,
-      color: "bg-yellow-100 text-yellow-700",
-    },
-    {
-      title: "Admin - Duyệt bản quyền",
-      description: "Quản lý và duyệt các bản quyền chờ xét duyệt",
-      href: "/moderate",
-      icon: UserGroupIcon,
-      color: "bg-purple-100 text-purple-700",
-    },
-  ];
+import { verifyToken } from "@/lib/auth";
 
+const cards = [
+  {
+    title: "Đăng ký bản quyền mới",
+    description: "Tạo mới bản quyền kỹ thuật số của bạn",
+    href: "/register",
+    icon: DocumentTextIcon,
+    color: "bg-blue-100 text-blue-700",
+  },
+  {
+    title: "Danh sách bản quyền",
+    description: "Xem các bản quyền",
+    href: "/explore",
+    icon: CheckBadgeIcon,
+    color: "bg-green-100 text-green-700",
+  },
+  {
+    title: "Tra cứu bản quyền",
+    description: "Tìm kiếm và kiểm tra trạng thái bản quyền",
+    href: "/search",
+    icon: CheckCircleIcon,
+    color: "bg-yellow-100 text-yellow-700",
+  },
+  {
+    title: "Admin - Duyệt bản quyền",
+    description: "Quản lý và duyệt các bản quyền chờ xét duyệt",
+    href: "/moderate",
+    icon: UserGroupIcon,
+    color: "bg-purple-100 text-purple-700",
+  },
+];
+
+export default async function Dashboard() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("access_token")?.value;
+
+  if (!token || !verifyToken(token)) {
+    redirect("/auth/login");
+  }
+
+  // Token hợp lệ => render Dashboard
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center py-16 px-6">
       <h1 className="text-4xl font-extrabold mb-12 text-gray-900 text-center max-w-3xl">
